@@ -424,6 +424,7 @@ FROM hourly_energy_use;
 &nbsp;&nbsp;&nbsp;To create a net energy table, the “hourly_energy_use”, “energy_production”, and “weather” will be combined. 
 
 ```sql
+--Create table for net energy
 CREATE TABLE IF NOT EXISTS net_energy AS
 WITH cte_use AS(
 	SELECT DATE(Date, 'start of month') AS Month, SUM(EnergyConsumption) AS 'MonthlyEnergyUse'
@@ -492,14 +493,15 @@ import pandas as pd
 
 db_path = "C:/General/Project/Building Energy/Data set/blg_energy.db"
 
+#Create connection with blg_energy.db and transform dates to appropriate data type
 try:
     with sqlite3.connect(db_path) as conn:
-        #Import annual energy use
+        #Import annual energy use table
         annual_energy_use = pd.read_sql_query("SELECT * FROM annual_energy_use", conn)
         annual_energy_use['Year'] = annual_energy_use['Year'].astype(int)
         annual_energy_use = annual_energy_use.sort_values('Year', ascending=False)
 
-        #Import and transform hourly energy use
+        #Import and transform hourly energy use table
         hourly_energy_use = pd.read_sql_query("SELECT * FROM hourly_energy_use", conn) 
         hourly_energy_use['Date'] = pd.to_datetime(hourly_energy_use['Date'], format='%Y-%m-%d')
         hourly_energy_use['Time'] = pd.to_datetime(hourly_energy_use['Time'], format='%I:%M:%S %p')
@@ -508,7 +510,7 @@ try:
         hourly_energy_use.insert(0, 'DateTime', hourly_energy_use.pop('DateTime'))
         hourly_energy_use = hourly_energy_use.sort_values(by='DateTime')
 
-        #Import and transform net energy
+        #Import and transform net energy table
         net_energy = pd.read_sql_query("SELECT * FROM net_energy", conn)
         net_energy['Month'] = pd.to_datetime(net_energy['Month'], format='%Y-%m-%d')
 
@@ -543,10 +545,16 @@ except Exception as e:
 import matplotlib
 import matplotlib.pyplot as plt
 
+#Transform to wide format for graphing
 annual_energy_use_pivot = annual_energy_use.pivot(index='Year', columns='Category', values='Percentage')
 
+#Manually define Set2 colors from seaborn, seaborn does not support stacked bar graphs
 set2_colors = ['#66c2a5', '#fc8d62', '#8da0cb']  
+
+#Set plot parameters through matplotlib
 ax = annual_energy_use_pivot.plot(kind='barh', stacked=True, figsize=(10, 6), color=set2_colors)
+
+#Formatting
 plt.title('Relative Energy Use by Category ', fontsize=22)
 plt.ylabel(None)
 plt.yticks(fontsize=14)
@@ -559,6 +567,7 @@ ax.grid(False)
 plt.box(False)
 ax.get_xaxis().set_ticks([])
 plt.tight_layout()
+
 plt.show()
 ```
 <p align="center">
@@ -571,8 +580,13 @@ plt.show()
 #Compare 2015 and 2016 energy consumption
 import seaborn as sns
 
+#Set figure size
 plt.figure(figsize=(12, 6))
+
+#Set plot parameters through seaborn
 ax = sns.barplot(data=annual_energy_use, x='EnergyConsumption' , y='Year', hue='Category', orient='h', palette='Set2', order=['2016', '2015'])
+
+#Formatting
 plt.suptitle('Annual Energy Use Breakdown', fontsize=22, ha='center')
 plt.xlabel('Energy Use (kW)', fontsize=12)
 plt.ylabel(None) 
@@ -586,10 +600,10 @@ for p in ax.patches:
     value = width 
     if value > 0:
         ax.annotate(f'{value:.0f}', (x + width/2, y + height/2), 
-                    ha='center', va='center', fontsize=14, color='white')
-    
+                    ha='center', va='center', fontsize=14, color='white')    
 plt.box(False)
 plt.tight_layout()
+
 plt.show()
 ```
 <p align="center">
@@ -601,13 +615,17 @@ plt.show()
 ```python
 #Calculate energy consumption difference
 print(f"2015 vs. 2016 Energy Consumption".center(80,'-'))
+
+#Create dataframes for each category
 hvac_data = annual_energy_use[annual_energy_use['Category'] == 'HVAC']
 lighting_data = annual_energy_use[annual_energy_use['Category'] == 'Lighting']
 load_data = annual_energy_use[annual_energy_use['Category'] == 'Load']
 
+#Input category data by year
 energy_2015 = hvac_data[hvac_data['Year'] == 2015]['EnergyConsumption'].values[0]
 energy_2016 = hvac_data[hvac_data['Year'] == 2016]['EnergyConsumption'].values[0]
 
+#Compute for difference
 kw_difference = round((energy_2016 - energy_2015),2)
 percentage_difference = ( kw_difference/ energy_2015) * 100
 
@@ -643,20 +661,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
+#Create a filter to get data from July 2014 to July 2015
 mask = (net_energy['Month'] > '2014-06-30') & (net_energy['Month'] <= '2015-07-31')
+
+#Create dataframe for filtered data and transform data for plotting
 net_energy_y1 = net_energy.loc[mask]
 net_energy_y1 = net_energy_y1.melt(id_vars=['Month', 'AverageTemperature'], var_name='Type', value_name='Energy')
 net_energy_y1['Month'] = net_energy_y1['Month'].dt.strftime('%Y-%b')
 
+#Set figure size
 fig, ax1 = plt.subplots(figsize=(15, 6))
+
+#Share x-axis for bar and point plot
 ax2 = ax1.twinx()
 
+#Set bar plot parameters for energy production and consumption
 sns.barplot(data=net_energy_y1, x='Month', y='Energy', hue='Type', hue_order=['EnergyProd','MonthlyEnergyUse'], palette='Set2', ax=ax1)
 
+#Set point plot parameters for weather
 sns.pointplot(data=net_energy_y1, x='Month', y='AverageTemperature', ax=ax2, 
               color='black', label='Average Temperature', markers="D", 
               linestyles="dashed", linewidth=1.2, markeredgewidth=0.8, markerfacecolor="black", markersize=6)
 
+#Formatting
 bars, labels1 = ax1.get_legend_handles_labels()  
 points, labels2 = ax2.get_legend_handles_labels() 
 new_labels = ['Energy Production', 'Energy Consumption', 'Average Temperature']
@@ -670,7 +697,6 @@ plt.suptitle('Monthly Net Energy and Average Weather Temperature', fontsize=22, 
 ax1.set_xlabel(None)
 ax1.set_ylabel('Energy (kW)', fontsize=14)
 ax2.set_ylabel('Average Temperature (°C)', fontsize=14)
-
 plt.tight_layout(rect=[0, 0, 0.9, 1]) 
 
 plt.show()
@@ -682,7 +708,6 @@ plt.show()
 &nbsp;&nbsp;&nbsp;As we can see from the graph, there are 5 months (November to March) where the building was on a net negative. The sharp decline in average temperature at the last month of fall in November increased the energy consumption of the building while the temperature increased from the start of spring in March has reduced the energy consumption. The reduced energy production could also be due to the longer nights during winter, limiting the PV system’s productivity.
 
 ```python
-#Plot net energy
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -765,9 +790,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-# Assuming net_energy is your DataFrame
-
-# Compare initial vs latest energy prod 
+# Filter annual data
 mask1 = (net_energy['Month'] > '2014-06-30') & (net_energy['Month'] <= '2015-06-30')
 mask2 = (net_energy['Month'] > '2018-06-30') & (net_energy['Month'] <= '2019-06-30') 
 mask3 = (net_energy['Month'] > '2019-06-30') & (net_energy['Month'] <= '2020-06-30') 
@@ -791,7 +814,7 @@ for i, year_group in enumerate(year_groups):
     year_mean = year_data['EnergyProd'].mean()
     axes[i].axhline(year_mean, xmin=0, xmax=1, color='#fc8d62', linestyle='--', label=f'Mean: {year_mean:.2f} kW') # Add mean line
 
-    # Formatting
+ # Formatting
     start_year, end_year = year_group.split('-')
     axes[i].set_title(f'July {start_year} to June {end_year}')
     axes[i].set_xlabel(None)
@@ -800,7 +823,6 @@ for i, year_group in enumerate(year_groups):
     axes[i].legend(loc='lower right')
     axes[i].set_yticks(np.arange(0, 2500, 250))
     
-# Add overall title
 plt.suptitle('Annual PV System Energy Production', fontsize=16)
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.show()
@@ -816,27 +838,27 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Step 1: Filter only HVAC data
+# Create dataframe for HVAC data
 hvac_data = hourly_energy_use[hourly_energy_use['Category'] == 'HVAC'].copy()
 
-# Step 2: Convert DateTime to YearMonth for grouping
+# Convert DateTime to YearMonth for grouping
 hvac_data['YearMonth'] = hvac_data['DateTime'].dt.to_period('M')
 
-# Step 3: Aggregate HVAC energy use per month
+# Aggregate HVAC energy use per month
 monthly_hvac_energy = hvac_data.groupby('YearMonth')['EnergyConsumption'].sum().reset_index()
 
-# Step 4: Prepare net_energy for merging
+# Prepare net_energy for merging
 net_energy['YearMonth'] = net_energy['Month'].dt.to_period('M')  # Convert Month to YearMonth
 
-# Step 5: Merge datasets on YearMonth
+# Merge datasets on YearMonth
 hvac_energy_temp = monthly_hvac_energy.merge(
     net_energy[['YearMonth', 'AverageTemperature']], on='YearMonth', how='left'
 )
 
-# Step 6: Compute the average HVAC energy use
+# Compute the average HVAC energy use
 avg_energy = hvac_energy_temp['EnergyConsumption'].mean()
 
-# Step 7: Plot the scatter plot
+# Plot the scatter plot
 plt.figure(figsize=(8, 6))
 sns.scatterplot(data=hvac_energy_temp, x='EnergyConsumption', y='AverageTemperature', 
                 color='#66c2a5', s=100)
@@ -879,9 +901,13 @@ def get_season(month):
 # Add a 'Season' column
 hourly_energy_use['Season'] = hourly_energy_use['DateTime'].dt.month.apply(get_season)
 
+#Set figure size
 plt.figure(figsize=(10, 6))
+
+#Set plot parameters in seaborn
 sns.boxplot(data=hourly_energy_use, x='EnergyConsumption', y='Season', hue='Season', palette='Set2', legend=False)
 
+#Fornatting
 plt.title('Seasonal Energy Consumption Distribution', fontsize=16)
 plt.xlabel('Energy Consumption (kW)', fontsize=12)
 plt.ylabel(None)
@@ -899,7 +925,7 @@ plt.show()
 &nbsp;&nbsp;&nbsp;The box plots show how the hourly energy consumption is distributed by season. The least energy consumption happens during the fall season, maybe due to the comfortable weather at the time with a mean of 0.6 kW and Q3 or 75% of the data on or below 0.73 kW. As expected, winter has the most energy consumption with a mean of 0.91 kW and Q3 of 1.18 kW. Aside from additional heating requirement, lighting load would also increase due to longer nighttime.
 
 ```python
-# Extract Year and Month
+# Create columns for Year and Month
 hourly_energy_use['Year'] = hourly_energy_use['DateTime'].dt.year
 hourly_energy_use['Month'] = hourly_energy_use['DateTime'].dt.month
 
@@ -912,15 +938,11 @@ full_index = pd.MultiIndex.from_product([years, range(1, 13)], names=['Year', 'M
 
 # Pivot and reindex to fill missing months with 0
 pivot_data = monthly_data.pivot(index=['Year', 'Month'], columns='Category', values='EnergyConsumption').fillna(0)
-pivot_data = pivot_data.reindex(full_index, fill_value=0)  # Ensure all months exist
+pivot_data = pivot_data.reindex(full_index, fill_value=0)
 
-# Set up the figure without sharex
+#Set number of subplot
 num_years = len(years)
 fig, axes = plt.subplots(num_years, 1, figsize=(15, 4 * num_years))
-
-# Ensure axes is iterable (even if there's only one subplot)
-if num_years == 1:
-    axes = [axes]
 
 # Define category colors
 category_colors = {'HVAC': '#66c2a5', 'Lighting': '#fc8d62', 'Load': '#8da0cb'}
@@ -939,28 +961,21 @@ for i, year in enumerate(years):
     # Plot
     year_data.plot(kind='bar', stacked=True, ax=axes[i], color=[category_colors[col] for col in year_data.columns], legend=False)
 
-    # Formatting
+# Formatting
     axes[i].set_title(f'Monthly Energy Consumption - {year}')
     axes[i].set_ylabel('Energy Consumption (kW)')
     axes[i].grid(axis='y', linestyle='--', alpha=0.5)
     axes[i].set_xlabel(None)
     axes[i].set_yticks(np.arange(0, 2750, 250))
-    
-    # Set individual x-axis labels per subplot
     axes[i].set_xticks(range(12))
     axes[i].set_xticklabels(month_names, rotation=0)
 
-# Apply x-ticklabels to all subplots
 plt.setp(axes, xticklabels=month_names)
-
-# Move legend outside the plots (to the right)
 handles, labels = axes[0].get_legend_handles_labels()
 fig.legend(handles, labels, title='Category', loc='upper left', bbox_to_anchor=(0.86, 0.95), fontsize=14, frameon=False, title_fontsize=14)
-
-# Overall title
 plt.suptitle('Monthly Energy Consumption by Year', fontsize=16)
-
 plt.tight_layout(rect=[0, 0, 0.85, 1.0])  # Adjust layout to fit legend
+
 plt.show()
 ```
 <p align="center">
@@ -1021,6 +1036,7 @@ plt.ylabel('Energy Consumption (kW)', fontsize=12)
 plt.xticks(range(0, 24))  # Ensure x-axis shows all hours
 plt.ylim(top=7, bottom=0)
 plt.grid(True, linestyle='--', alpha=0.6)
+
 plt.show()
 ```
 <p align="center">
@@ -1052,6 +1068,7 @@ plt.title('Daily Energy Consumption on April 2016', fontsize=14)
 plt.xlabel('Day', fontsize=12)
 plt.ylabel('Energy Consumption (kW)', fontsize=12)
 plt.xticks(range(0, 30))  # Ensure x-axis shows all hours
+
 plt.show()
 ```
 <p align="center">
@@ -1085,6 +1102,7 @@ plt.ylabel('Energy Consumption (kW)', fontsize=12)
 plt.xticks(range(0, 24))  # Ensure x-axis shows all hours
 plt.ylim(top=7, bottom=0)
 plt.grid(True, linestyle='--', alpha=0.6)
+
 plt.show()
 ```
 <p align="center">
