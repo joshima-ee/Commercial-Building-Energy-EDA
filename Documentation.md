@@ -59,11 +59,9 @@
 - ERV  
 - Water Heater  
 
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Excel%20dataset.png" alt="Excel Dataset">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;In Powerquery, the columns are reduced to 4 columns (Date, Time, Circuit, & EnergyConsumption) by unpivoting the circuits using the following M code:
 
@@ -97,11 +95,10 @@ in
     #"Renamed Columns"
 
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/energy%20prod%20excel.png" alt="Energy Prod Data">
 </p>
--->
+
 
 &nbsp;&nbsp;&nbsp;Finally, we transform the “June 2014-December 2016” worksheet in the “Weather_Monthly_SI” workbook. The given file only has data from June 2014 to December 2016. The initial step is to transform this given data so that only the year, month, and average temperature are retained using the following M code:
 
@@ -120,11 +117,10 @@ let
 in
     #"Renamed Columns"
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/weather%20excel.png" alt="Weather Data">
 </p>
--->
+
 &nbsp;&nbsp;&nbsp;Next is to acquire additional weather data from wunderground.com. Manually creating a query for each month will be time consuming, thus Python will be used to automate some of the process later. First, a template must be created to extract the relevant table from the website and transform it to only retain the average temperature. The following M code for the query named “AverageMonthlyTemp” became the template:
 
 ```
@@ -274,19 +270,15 @@ let
 in
     #"Appended Query"
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/AvgTempConsolidation.png" alt="Consolidated Weather Data">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;All generated tables are then saved as comma-separated values (CSV) files before being imported as tables in a SQLite date base via DB Browser. The files are stored in a data base named “blg_energy” and are renamed as “blg_energy_use”, “energy_production”, and “weather” tables.
 
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Initial%20sqlite.png" alt="Generated SQLite Tables">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;Each table then underwent basic data quality check.
 
@@ -569,11 +561,9 @@ ax.get_xaxis().set_ticks([])
 plt.tight_layout()
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Annual%20Energy%20Use%20by%20Category.png" alt="Annual Energy Use by Category">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;From the generated stacked bar chart, lighting consistently has the most energy share. Load is the only category to increase from 2015 to 2016 by 4.69% while both HVAC and Lighting decreased.  Let us have a closer look.
 
@@ -602,11 +592,9 @@ plt.box(False)
 plt.tight_layout()
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Annual%20Energy%20Use%20by%20Category%20(2015%20vs%202016).png" alt="Annual Breakdown">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;In this chart, it can be observed that despite the differences in energy share from the previous graph, all categories have increased energy consumption. 
 
@@ -641,11 +629,9 @@ percentage_difference = ( kw_difference/ energy_2015) * 100
 
 print(f"Difference in load energy consumption: {kw_difference}kW or {percentage_difference:.2f}%")
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Annual%20Energy%20Use%20calculation.png" alt="Annual Energy Use Calculation">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;Load energy consumption has the most significant increase at 1596.20 kW or 34.12% increase compared to the previous year. However, lighting has still the most energy consumption at 7206 kW for the year 2016. It is also worth noting that the author pointed out that a change in lighting control system in December 2014 made some exterior lighting to be consistently powered even in daytime.
 
@@ -689,11 +675,10 @@ plt.tight_layout(rect=[0, 0, 0.9, 1])
 
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Monthly%20Net%20Energy%20and%20Average%20Weather%20Temperature.png" alt="Monthly Net Energy and Average Weather Temperature">
 </p>
--->
+
 &nbsp;&nbsp;&nbsp;As we can see from the graph, there are 5 months (November to March) where the building was on a net negative. The sharp decline in average temperature at the last month of fall in November increased the energy consumption of the building while the temperature increased from the start of spring in March has reduced the energy consumption. The reduced energy production could also be due to the longer nights during winter, limiting the PV system’s productivity.
 
 ```python
@@ -744,11 +729,10 @@ for bar, value in zip(ax.patches, net_energy_net['Net']):
 
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Monthly%20Net%20Energy.png" alt="Monthly Net Energy">
 </p>
--->
+
 &nbsp;&nbsp;&nbsp;To determine if the building is net-zero, let’s compute for the difference between the consumption and production between July 2014 to June 2015.
 
 ```python
@@ -769,11 +753,9 @@ print(f"Total Energy Consumption (July 2014 - June 2015): {total_consumption:.2f
 print(f"Total Energy Production (July 2014 - June 2015): {total_production:.2f} kW")
 print(f"Building Net Energy (July 2014 - June 2015): {net_energy_comp:.2f} kW")
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+	<img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Building%20Net%20Energy.png" alt="Net Energy Computation">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;Unfortunately, the building is net negative during the period with 522.03 kW. Despite energy surplus on most months, the energy demand during winter could not be offset. 
 
@@ -823,11 +805,9 @@ plt.suptitle('Annual PV System Energy Production', fontsize=16)
 plt.tight_layout(rect=[0, 0, 1, 0.96])
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Annual%20Energy%20Production.png" alt="Annual Energy Production">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;To compare a full 12-month period, a July to June year scheme is used to compensate for the missing data.  Most of the year, the building produces more energy than it is consuming, especially from mid spring April to late summer of August where energy production is generally above average. The building could opt to a net metering program with their distribution utility if they are not yet enrolled. This program allows the end user to sell electricity to the grid during excess production at a reduced market rate. This move could alleviate power cost during the winter season.
 
@@ -874,11 +854,9 @@ plt.legend()
 
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Energy%20Consumption%20vs%20Ave%20Temperature.png" alt="HVAC vs Temp">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;In general, an average temperature of below 10 °C or above 24 °C corresponds to above average energy consumption while temperature in between have average to below average energy consumption. The graph suggests that cooling is less energy intensive than heating.
 
@@ -911,16 +889,12 @@ plt.grid(axis='y', linestyle='--', alpha=0.6)
 
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Seasonal%20Energy%20Consumption%20Distribution.png" alt="Seasonal Energy">
 </p>
--->
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Seasonal%20Data%20Table.png" alt="Boxplot Stat">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;The box plots show how the hourly energy consumption is distributed by season. The least energy consumption happens during the fall season, maybe due to the comfortable weather at the time with a mean of 0.6 kW and Q3 or 75% of the data on or below 0.73 kW. As expected, winter has the most energy consumption with a mean of 0.91 kW and Q3 of 1.18 kW. Aside from additional heating requirement, lighting load would also increase due to longer nighttime.
 
@@ -989,11 +963,9 @@ plt.suptitle('Monthly Energy Consumption by Year', fontsize=16)
 plt.tight_layout(rect=[0, 0, 0.85, 1.0])  # Adjust layout to fit legend
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/Annual%20Energy%20Consumption.png" alt="Categorized Annual Energy">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;Out of the available energy consumption data, January 2016 has most energy consumption. During winter season, HVAC takes up most of the building’s power consumption, while lighting takes up during the other seasons.
 
@@ -1020,11 +992,9 @@ plt.ylabel('Energy Consumption (kW)', fontsize=12)
 plt.xticks(range(0, 31))  # Ensure x-axis shows all hours
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/January%202016%20Energy%20Consumption.png" alt="January 2016">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;January 19, 2016, is the busiest day of the month, let’s see how energy consumption is distributed throughout that day.
 
@@ -1053,11 +1023,9 @@ plt.ylim(top=7, bottom=0)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/January%20Hourly%20Energy%20Consumption.png" alt="January Hourly">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;From the given graph, it can be concluded that HVAC is the primary category for energy consumption. HVAC peaked at 7 AM, likely due to morning startup. The HVAC energy consumption from 7 AM onwards is very jagged, which could indicate inefficient operation. Lighting and load pattern indicates most occupants stay between 9 AM to 6 PM. 
 
@@ -1086,11 +1054,9 @@ plt.ylabel('Energy Consumption (kW)', fontsize=12)
 plt.xticks(range(0, 30))  # Ensure x-axis shows all hours
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/April%202016%20Energy%20Consumption.png" alt="April 2016">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;April 21, 2016, is the busiest day of the month, let’s see how energy consumption is distributed throughout that day.
 
@@ -1121,11 +1087,9 @@ plt.ylim(top=7, bottom=0)
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.show()
 ```
-<!---
 <p align="center">
-  <img src="https://github.com/joshima-ee/Commercial-Building-EDA/blob/main/images/image1.png" alt="Set2 Color Palette">
+  <img src="https://github.com/joshima-ee/Commercial-Building-Energy-EDA/blob/main/Images/April%20Hourly%20Energy%20Consumption.png" alt="April Hourly">
 </p>
--->
 
 &nbsp;&nbsp;&nbsp;As expected, HVAC energy consumption is very low and smoother with a peak at 3 PM. Interestingly, lighting load seemed to increase while general load decreased. Lighting and load pattern indicates most occupants stay between 8 AM to 6 PM.
 
