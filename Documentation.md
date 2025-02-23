@@ -1,4 +1,4 @@
-# Commercial Building Exploratory Data Analysis
+# Commercial Building Energy Exploratory Data Analysis
 
 ## Introduction
 &nbsp;&nbsp;&nbsp;This exploratory data analysis (EDA) aims to assess the energy efficiency of a zero-energy commercial building in Charlottesville, Virginia, and evaluate whether its 12.3 kWp solar PV system meets its energy demands. The insights will help identify energy-saving opportunities and optimization strategies. The dataset is acquired through Kaggle (https://www.kaggle.com/datasets/claytonmiller/building-energy-use-production-and-air-leakage). This EDA utilizes the following Excel files from the dataset:
